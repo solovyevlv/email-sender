@@ -1,0 +1,3 @@
+0 22   *   * *	validate_email.php
+0 10   *   * *	send_message_soon_expiring_subscription.php
+0 10 10,25 * *  send_message_expired_subscription.php

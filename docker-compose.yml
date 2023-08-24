@@ -1,0 +1,93 @@
+version: '3.7'
+
+services:
+    karma8_php:
+        build:
+            context: ./docker/php/
+            dockerfile: Dockerfile
+        restart: always
+        volumes:
+            - "php_data:/var/opt"
+        networks:
+            - karma8_net
+        depends_on:
+            - karma8_amqp
+            - karma8_db
+            - karma8_db_rep
+        entrypoint: /var/opt/run.sh
+
+    karma8_db:
+        build:
+            context: ./docker/db/master/
+            dockerfile: Dockerfile
+        restart: always
+        volumes:
+            - "db_master_data:/var/lib/postgresql/data/pgdata"
+        networks:
+            - karma8_net
+        environment:
+            POSTGRES_DB: karma8
+            POSTGRES_PASSWORD: postgres-karma8
+            PGDATA: "/var/lib/postgresql/data/pgdata"
+        ports:
+            - "5432:5432"
+        logging:
+            options:
+                max-size: "1m"
+                max-file: "3"
+
+    karma8_db_rep:
+        build:
+            context: ./docker/db/rep/
+            dockerfile: Dockerfile
+        restart: always
+        volumes:
+            - "db_rep_data:/var/lib/postgresql/data/pgdata"
+        networks:
+            - karma8_net
+        environment:
+            POSTGRES_DB: karma8
+            POSTGRES_PASSWORD: postgres-karma8
+            PGDATA: /var/lib/postgresql/data/pgdata
+        ports:
+            - "5433:5432"
+        logging:
+            options:
+                max-size: "1m"
+                max-file: "3"
+        depends_on:
+            - karma8_db
+
+    karma8_amqp:
+        build:
+            context: ./docker/amqp/
+            dockerfile: Dockerfile
+        restart: always
+        networks:
+            - karma8_net
+        ports:
+            - "15672:15672"
+
+networks:
+    karma8_net:
+        driver: bridge
+
+volumes:
+    php_data:
+        driver: local
+        driver_opts:
+            o: bind
+            type: none
+            device: ./app
+    db_master_data:
+        driver: local
+        driver_opts:
+            o: bind
+            type: none
+            device: ./docker/db/master/data
+    db_rep_data:
+        driver: local
+        driver_opts:
+            o: bind
+            type: none
+            device: ./docker/db/rep/data
