@@ -36,3 +36,16 @@
 Есть генератор юзеров для заполнения бд запуск: `php src/user_generator.php n`
 n - колличество записей. 
 Успешно протестировано на: 10K, 100K, 1M, 5M
+
+**3. PHP**
+
+Команды расположены `app/src/command`
+ * send_message_expired_subscription.php
+ * send_message_soon_expiring_subscription.php
+ * validate_email.php
+
+Запускаются cron: `config/crontab`
+
+* `0 22   *   * *  validate_email.php`
+* `0 10   *   * *  send_message_soon_expiring_subscription.php`
+* `0 10 10,25 * *  send_message_expired_subscription.php`
